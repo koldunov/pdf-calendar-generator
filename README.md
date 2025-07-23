@@ -2,6 +2,8 @@
 
 A simple, lightweight web-based calendar generator that creates printable PDF calendars for any date range. Perfect for planning, note-taking, and organizing your schedule.
 
+![](https://github.com/koldunov/pdf-calendar-generator/blob/main/examples/calendar.jpg)
+
 ## ✨ Features
 
 - **📱 No Installation Required** - Runs directly in your web browser
