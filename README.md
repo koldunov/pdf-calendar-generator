@@ -66,24 +66,6 @@ A simple, lightweight web-based calendar generator that creates printable PDF ca
 
 While the interface works on mobile devices, PDF generation works best on desktop browsers for optimal file handling.
 
-## 🤝 Contributing
-
-Contributions are welcome! Here are some ways you can help:
-
-- 🐛 Report bugs
-- 💡 Suggest new features
-- 🔧 Submit pull requests
-- 📖 Improve documentation
-- ⭐ Star the repository
-
-### Development Setup
-
-1. Fork this repository
-2. Clone your fork: `git clone https://github.com/yourusername/pdf-calendar-generator.git`
-3. Open `index.html` in your browser
-4. Make your changes
-5. Test thoroughly
-6. Submit a pull request
 
 ## 📝 License
 
@@ -107,21 +89,3 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - PDF generation may not work in some restricted environments (like some online code editors)
 - For best results, use the downloaded HTML file locally
 
-## 📞 Support
-
-If you encounter any issues or have questions:
-
-1. Check the [Issues](https://github.com/yourusername/pdf-calendar-generator/issues) page
-2. Create a new issue if your problem isn't already reported
-3. Provide as much detail as possible about your browser and the issue
-
-## ⭐ Show Your Support
-
-If this project helped you, please consider:
-- ⭐ Starring the repository
-- 🐦 Sharing it on social media
-- 💝 Recommending it to friends and colleagues
-
----
-
-**Made with ❤️ for better organization and planning**
