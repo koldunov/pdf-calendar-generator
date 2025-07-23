@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF Calendar Generator</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 28px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #555;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .date-range {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        
+        button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        .preview {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📅 PDF Calendar Generator</h1>
+        
+        <div class="form-group">
+            <label for="startMonth">Start Month:</label>
+            <div class="date-range">
+                <select id="startMonth">
+                    <option value="1">January</option>
+                    <option value="2">February</option>
+                    <option value="3">March</option>
+                    <option value="4">April</option>
+                    <option value="5">May</option>
+                    <option value="6">June</option>
+                    <option value="7">July</option>
+                    <option value="8">August</option>
+                    <option value="9">September</option>
+                    <option value="10">October</option>
+                    <option value="11">November</option>
+                    <option value="12">December</option>
+                </select>
+                <input type="number" id="startYear" value="2025" min="2020" max="2030">
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <label for="endMonth">End Month:</label>
+            <div class="date-range">
+                <select id="endMonth">
+                    <option value="1">January</option>
+                    <option value="2">February</option>
+                    <option value="3">March</option>
+                    <option value="4">April</option>
+                    <option value="5">May</option>
+                    <option value="6">June</option>
+                    <option value="7">July</option>
+                    <option value="8">August</option>
+                    <option value="9">September</option>
+                    <option value="10">October</option>
+                    <option value="11">November</option>
+                    <option value="12">December</option>
+                </select>
+                <input type="number" id="endYear" value="2025" min="2020" max="2030">
+            </div>
+        </div>
+        
+        <button onclick="generateCalendar()">📋 Generate PDF Calendar</button>
+        
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Generating calendar...</p>
+        </div>
+        
+        <div class="preview" id="preview" style="display: none;"></div>
+    </div>
+
+    <script>
+        const monthNames = [
+            'January', 'February', 'March', 'April', 'May', 'June',
+            'July', 'August', 'September', 'October', 'November', 'December'
+        ];
+        
+        const dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+
+        function generateCalendar() {
+            const startMonth = parseInt(document.getElementById('startMonth').value);
+            const startYear = parseInt(document.getElementById('startYear').value);
+            const endMonth = parseInt(document.getElementById('endMonth').value);
+            const endYear = parseInt(document.getElementById('endYear').value);
+            
+            // Show loading indicator
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('preview').style.display = 'none';
+            
+            setTimeout(() => {
+                try {
+                    // Check jsPDF availability
+                    if (typeof window.jspdf === 'undefined') {
+                        throw new Error('jsPDF library not loaded');
+                    }
+                    
+                    const { jsPDF } = window.jspdf;
+                    const doc = new jsPDF('landscape', 'mm', 'a4');
+                    
+                    let currentMonth = startMonth;
+                    let currentYear = startYear;
+                    let isFirstPage = true;
+                    
+                    while (currentYear < endYear || (currentYear === endYear && currentMonth <= endMonth)) {
+                        if (!isFirstPage) {
+                            doc.addPage();
+                        }
+                        isFirstPage = false;
+                        
+                        drawMonthCalendar(doc, currentMonth, currentYear);
+                        
+                        currentMonth++;
+                        if (currentMonth > 12) {
+                            currentMonth = 1;
+                            currentYear++;
+                        }
+                    }
+                    
+                    // Save PDF
+                    const filename = `calendar_${startMonth}-${startYear}_to_${endMonth}-${endYear}.pdf`;
+                    doc.save(filename);
+                    
+                    // Show preview
+                    const totalMonths = calculateTotalMonths(startMonth, startYear, endMonth, endYear);
+                    document.getElementById('preview').innerHTML = `
+                        <h3>✅ Calendar created successfully!</h3>
+                        <p><strong>Period:</strong> ${monthNames[startMonth-1]} ${startYear} - ${monthNames[endMonth-1]} ${endYear}</p>
+                        <p><strong>Total months:</strong> ${totalMonths}</p>
+                        <p><strong>File:</strong> ${filename}</p>
+                    `;
+                    document.getElementById('preview').style.display = 'block';
+                    
+                } catch (error) {
+                    console.error('Error creating calendar:', error);
+                    document.getElementById('preview').innerHTML = `
+                        <h3>❌ Error creating calendar</h3>
+                        <p>${error.message}</p>
+                        <p>Try downloading the HTML file and running it locally.</p>
+                    `;
+                    document.getElementById('preview').style.display = 'block';
+                } finally {
+                    document.getElementById('loading').style.display = 'none';
+                }
+            }, 100);
+        }
+        
+        function calculateTotalMonths(startMonth, startYear, endMonth, endYear) {
+            return (endYear - startYear) * 12 + (endMonth - startMonth) + 1;
+        }
+        
+        function drawMonthCalendar(doc, month, year) {
+            const pageWidth = 297; // A4 landscape width in mm
+            const pageHeight = 210; // A4 landscape height in mm
+            const margin = 6; // Minimal margins
+            const calendarWidth = pageWidth - 2 * margin;
+            const calendarHeight = 188; // Maximum height
+            
+            // Month title
+            doc.setFontSize(18);
+            doc.setFont(undefined, 'bold');
+            const title = `${monthNames[month - 1]} ${year}`;
+            const titleWidth = doc.getTextWidth(title);
+            doc.text(title, (pageWidth - titleWidth) / 2, 15);
+            
+            // Cell dimensions
+            const cellWidth = calendarWidth / 7; // ~41.5mm
+            const headerHeight = 8;
+            const cellHeight = (calendarHeight - headerHeight) / 6; // ~30mm
+            
+            const startX = margin;
+            const startY = 20;
+            
+            // Day headers
+            doc.setFontSize(10);
+            doc.setFont(undefined, 'bold');
+            
+            for (let i = 0; i < 7; i++) {
+                const x = startX + i * cellWidth;
+                const y = startY;
+                
+                // Header frame
+                doc.setFillColor(240, 240, 240);
+                doc.rect(x, y, cellWidth, headerHeight, 'FD');
+                
+                // Day name text
+                doc.setTextColor(0, 0, 0);
+                const dayName = dayNames[i];
+                const textWidth = doc.getTextWidth(dayName);
+                doc.text(dayName, x + (cellWidth - textWidth) / 2, y + 6);
+            }
+            
+            // Get first day of month and number of days
+            const firstDay = new Date(year, month - 1, 1);
+            const lastDay = new Date(year, month, 0);
+            const daysInMonth = lastDay.getDate();
+            
+            // Calculate starting position (Monday = 0)
+            let startDayOfWeek = firstDay.getDay() - 1;
+            if (startDayOfWeek === -1) startDayOfWeek = 6; // Sunday becomes 6
+            
+            // Draw days
+            doc.setFont(undefined, 'normal');
+            doc.setFontSize(10);
+            
+            let day = 1;
+            for (let week = 0; week < 6; week++) {
+                for (let dayOfWeek = 0; dayOfWeek < 7; dayOfWeek++) {
+                    const x = startX + dayOfWeek * cellWidth;
+                    const y = startY + headerHeight + week * cellHeight;
+                    
+                    // Cell frame
+                    doc.setDrawColor(150, 150, 150);
+                    doc.rect(x, y, cellWidth, cellHeight);
+                    
+                    // Day number in top left corner
+                    if ((week === 0 && dayOfWeek >= startDayOfWeek) || (week > 0 && day <= daysInMonth)) {
+                        if (day <= daysInMonth) {
+                            doc.setTextColor(0, 0, 0);
+                            doc.text(day.toString(), x + 2, y + 6);
+                            day++;
+                        }
+                    }
+                }
+                
+                if (day > daysInMonth) break;
+            }
+        }
+        
+        // Set current month as default
+        const now = new Date();
+        document.getElementById('startMonth').value = now.getMonth() + 1;
+        document.getElementById('startYear').value = now.getFullYear();
+        document.getElementById('endMonth').value = now.getMonth() + 1;
+        document.getElementById('endYear').value = now.getFullYear();
+    </script>
+</body>
+</html>
