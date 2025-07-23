@@ -14,7 +14,7 @@ A simple, lightweight web-based calendar generator that creates printable PDF ca
 ## 🚀 Quick Start
 
 ### Option 1: Online (Recommended)
-1. Visit: **[Live Demo](https://yourusername.github.io/pdf-calendar-generator)**
+1. Visit: **[Live Demo](https://koldunov.github.io/pdf-calendar-generator)**
 2. Select your date range
 3. Click "Generate PDF Calendar"
 4. Download your custom calendar!
